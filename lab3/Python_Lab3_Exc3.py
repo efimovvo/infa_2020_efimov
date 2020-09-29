@@ -268,8 +268,8 @@ pygame.init()
 
 # Constants
 FPS = 30
-LENGTH = 600
-HEIGHT = 400
+LENGTH = 800
+HEIGHT = 600
 
 # Color set
 BLUE = (170, 238, 255)
@@ -300,28 +300,41 @@ screen.fill(BLUE)
 rect(screen, GREEN, [0, HEIGHT, LENGTH, - HEIGHT // 2], 0)
 
 # Drawing two girls in center
-draw_girl(HEIGHT // 6, HEIGHT // 3, arms={'left' : 'straight', 'right' : 'bend'})
-draw_boy(-HEIGHT // 6, HEIGHT // 3, arms={'left' : 'straight', 'right' : 'straight'})
+draw_girl(-HEIGHT // 12, HEIGHT // 6, arms={'left' : 'straight', 'right' : 'bend'})
+draw_girl(HEIGHT // 12, HEIGHT // 6, arms={'left' : 'bend', 'right' : 'straight'})
+draw_boy(-HEIGHT // 4, HEIGHT // 6, arms={'left' : 'straight', 'right' : 'straight'})
+draw_boy(HEIGHT // 4, HEIGHT // 6, arms={'left' : 'straight', 'right' : 'straight'})
 draw_icecream(
 	colors={'cone' : ORANGE,
 			'ball_1' : BROWN,
 			'ball_2' : WHITE,
 			'ball_3' : RED},
-	base_point=(center + np.array([-HEIGHT // 3, HEIGHT // 12])),
-	fiber_length=0,
+	base_point=(center + np.array([0, -HEIGHT // 24])),
+	fiber_length=HEIGHT // 6,
 	icecream_size=HEIGHT // 10,
 	fiber_vector=np.array([0.1, -0.8]),
 	icecream_vector=np.array([-0.1, -1])
 	)
 draw_icecream(
+	colors={'cone' : ORANGE,
+			'ball_1' : BROWN,
+			'ball_2' : WHITE,
+			'ball_3' : RED},
+	base_point=(center + np.array([HEIGHT // 3, HEIGHT // 25])),
+	fiber_length=0,
+	icecream_size=HEIGHT // 20,
+	fiber_vector=np.array([1, 1]),
+	icecream_vector=np.array([0.1, -0.6])
+	)
+draw_icecream(
 	colors={'cone' : RED,
 			'ball_1' : RED,
 			'ball_2' : RED},
-	base_point=(center + np.array([HEIGHT // 3, -HEIGHT // 12])),
+	base_point=(center + np.array([-HEIGHT // 3, HEIGHT // 25])),
 	fiber_length=HEIGHT // 10,
-	icecream_size=HEIGHT // 10,
-	fiber_vector=np.array([0.1, -0.5]),
-	icecream_vector=np.array([0.1, -0.6])
+	icecream_size=HEIGHT // 15,
+	fiber_vector=np.array([-0.1, -1]),
+	icecream_vector=np.array([-0.1, -1])
 	)
 
 
