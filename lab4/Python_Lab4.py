@@ -8,8 +8,8 @@ def draw_the_figures(figures):
 	---
 	arguments:
 		figures: list of dictionaries - the list of balls
-		form: string - ball of square
 	'''
+
 	for figure in figures:
 		if figure['form'] == 'ball':
 			circle(screen, figure['color'],
@@ -24,22 +24,40 @@ def draw_the_figures(figures):
 				)
 				)
 
+def write_line(text, position_x, position_y, height, color):
+	''' Function writes text line on the screen
+	---
+	arguments
+		text: string
+		position_x: int
+		position_y: int
+		height: int
+		color: list(int, int, int) - figure color in RGB
+	'''
+
+	pg_text = pygame.font.Font(None, height)
+	text_line = pg_text.render(text, 1, color) # text rendering
+	screen.blit(text_line, (position_x, position_y)) # placing text on the screen
+
 def draw_the_score(score):
 	''' Function draw the score in the left top corner
 	---
 	arguments:
 		score: int - current score
 	'''
-	pg_text = pygame.font.Font(None, 36)
+
 	if background_color == WHITE:
 		color = BLACK
 	else:
 		color = WHITE
-	current_score = pg_text.render('Score: ' + str(int(score)), 1, color) # text rendering
-	screen.blit(current_score, (10, 20)) # placing text on the screen
+	
+	# Writing current score
+	current_score = 'Score: ' + str(int(score)) # text rendering
+	write_line(current_score, 10, 20, 36, color)
 	if len(rating) > 0:
-		top_score = pg_text.render('Best score: ' + str(int(rating[0][1])), 1, color) # text rendering
-		screen.blit(top_score, (screen_size[0] // 2, 20)) # placing text on the screen
+		# Writing best score
+		top_score = 'Best score: ' + str(int(rating[0][1])) # text rendering
+		write_line(top_score, screen_size[0] // 2, 20, 36, color)
 
 def create_figure(form):
 	''' Function create the figure parameters
@@ -55,7 +73,7 @@ def create_figure(form):
 			r: float - figure radius
 			color: list(int, int, int) - figure color in RGB
 	'''
-	global x, y, v_x, v_y, r, color
+
 	# X, Y position of figure center
 	position_x = randint(100, screen_size[0] - 100)
 	position_y = randint(100, screen_size[1] - 100)
@@ -75,7 +93,15 @@ def create_figure(form):
 		velocity_y = -velocity_y_abs
 	figure_radius = randint(max_ball_radius // 2, max_ball_radius)
 	figure_color = COLORS[randint(0, 5)]
-	return {'x': position_x, 'y': position_y, 'v_x': velocity_x, 'v_y': velocity_y, 'r': figure_radius, 'color': figure_color, 'form': form}
+	return {
+		'x': position_x,
+		'y': position_y,
+		'v_x': velocity_x,
+		'v_y': velocity_y,
+		'r': figure_radius,
+		'color': figure_color,
+		'form': form
+		}
 
 def change_background(color):
 	''' Function changing background color from WHITE to BLACK and back
@@ -100,17 +126,18 @@ def click(event):
 	arguments:
 		event: pygame.event - current event
 	'''
+
 	global background_color, score
 
 	# Searching for the clicked ball
 	for figure in figures:
 		distance = ((event.pos[0] - figure['x'])**2 + (event.pos[1] - figure['y'])**2)**0.5
 		if (distance <= figure['r']):
-			score += 100 // figure['r']
+			score += 100 // figure['r'] # increase the score
 			background_color = change_background(background_color)
-			figure['r'] /= 1.5
-			figure['v_x'] /= 1.5
-			figure['v_y'] /= 1.5
+			figure['r'] /= 1.5 # decrease the radius
+			figure['v_x'] /= 1.5 # decrease x velocity
+			figure['v_y'] /= 1.5 # decrease y velocity
 			break
 	pygame.display.update()
 
@@ -119,10 +146,13 @@ def move_the_figure(figure):
 	---
 	arguments:
 		figure: dictionary - current figure
+	return
+		figure: dectionary - figure after changing
 	'''
+
 	global score
 
-	# Current growth of ball sizes and velocities
+	# Current growth of ball's size and velocities
 	if figure['form'] == 'ball':
 		figure['r'] *= 1.005
 		figure['v_x'] *= 1.005
@@ -151,27 +181,24 @@ def move_the_figure(figure):
 		figure['y'] = 2*max_y - figure['y']
 		figure['v_y'] *= -0.75
 		figure['v_x'] *= 0.75
-		# Decreasing score after interaction with the floor
-		score -= figure['r'] / 4
+		score -= figure['r'] / 4 # decreasing score after interaction with the floor
 	elif figure['y'] < min_y:
 		figure['y'] = 2*min_x - figure['y']
 		figure['v_y'] *= -1
 
 	return figure
 
-def write_line(text, position_x, position_y, height, color):
-	pg_text = pygame.font.Font(None, height)
-	text_line = pg_text.render(text, 1, color) # text rendering
-	screen.blit(text_line, (position_x, position_y)) # placing text on the screen
-
 def game_over():
 	''' Function shows your score on the screen and write the score in rating '''
+
 	screen.fill(BLACK)
-	write_line(user_name + ', your score is ' + str(int(score)), screen_size[0]//10, screen_size[1]//4, 80, WHITE) # write line number
+	# Printing result
+	write_line('Game over. ' + user_name + ', your score is ' + str(int(score)), screen_size[0]//10, screen_size[1]//4, 60, WHITE) # write line number
 	'''pg_text = pygame.font.Font(None, 100)
 				text_score = pg_text.render(, 1, WHITE) # text rendering
 				screen.blit(text_score, (screen_size[0]//10, screen_size[1]//4)) # placing text on the screen'''
 
+	# Printing rating
 	for i in range(np.minimum(10, len(rating))):
 		if (i+1 == position_in_rating) or (position_in_rating > 10 and i == 9):
 			color = RED
@@ -190,7 +217,6 @@ def game_over():
 			write_line(str(position_in_rating), screen_size[0]//6, screen_size[1]//2.5 + i*20, 30, color) # write line number
 			write_line(rating[position_in_rating-1][0], screen_size[0]//5, screen_size[1]//2.5 + i*20, 30, color) # write line number
 			write_line(str(rating[position_in_rating-1][1]), screen_size[0]//1.5, screen_size[1]//2.5 + i*20, 30, color) # write line number
-		
 
 	pygame.display.update()
 
@@ -228,13 +254,18 @@ def write_score_to_rating():
 		file.write(rating_string)
 	return position_in_rating
 
-user_name = ''
+# Game initializing
+pygame.init()
+clock = pygame.time.Clock()
+finished = False
+quited = False
 
+# Getting player name
+user_name = ''
 while len(user_name) == 0:
 	user_name = input('Type your nickname: ')
 
-pygame.init()
-
+# Screen parameters
 FPS = 20
 screen_size = (1000, 600)
 screen = pygame.display.set_mode(screen_size)
@@ -251,28 +282,28 @@ WHITE = (255, 255, 255)
 # Color set for balls
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
-pygame.display.update()
-clock = pygame.time.Clock()
-finished = False
-quited = False
-
+# Game settings
 number_of_balls = 5
 number_of_squares = 3
-figures = [] # initializing list of figures
 max_ball_radius = 50
 max_ball_speed = 0.2
 g = 0.0002 # gravity acceleration
+
+# Creating variables for game process
 score = 0 # initial score
 rating = [] # initializing rating list
+figures = [] # initializing list of figures
+background_color = BLACK # initial backgound color
 
 # Reading rating of players
 with open('rating.txt') as file:
+	# Reading lines in file
 	for line in file:
 		rating += [line.rstrip().split()]
-
+	# Converting scores form string to int
 	for i in range(len(rating)):
 		rating[i][1] = int(rating[i][1])
-	# Rating sort
+	# Sorting rating
 	rating = sorted(rating, key=lambda line: -line[1])
 
 # Generating ball set
@@ -284,10 +315,9 @@ for i in range(number_of_squares):
 	figures += [create_figure(form='square')]
 	draw_the_figures([figures[i + number_of_balls]])
 
-background_color = BLACK
+#draw_the_score(score)
 
-draw_the_score(score)
-
+# Main game cicle
 while not finished:
 	clock.tick(FPS)
 	screen.fill(background_color)
@@ -312,7 +342,7 @@ while not finished:
 position_in_rating = write_score_to_rating()
 game_over()
 
-# Waiting for quite
+# Waiting for quit
 while not quited:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:

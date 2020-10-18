@@ -1,4 +1,7 @@
+Hello 42
 Slava 32
+Yt 31
+U 16
 lk 14
 ss 0
 g 0
@@ -13,6 +16,8 @@ Slava 0
 Slava 0
 fsdg 0
 1 0
+yyy -19
+U -24
 Looser_sqared -25
 Looser -125
 asdf -159
