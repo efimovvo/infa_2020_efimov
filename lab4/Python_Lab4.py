@@ -35,8 +35,11 @@ def draw_the_score(score):
 		color = BLACK
 	else:
 		color = WHITE
-	text_score = pg_text.render('Score: ' + str(int(score)), 1, color) # text rendering
-	screen.blit(text_score, (10, 20)) # placing text on the screen
+	current_score = pg_text.render('Score: ' + str(int(score)), 1, color) # text rendering
+	screen.blit(current_score, (10, 20)) # placing text on the screen
+	if len(rating) > 0:
+		top_score = pg_text.render('Best score: ' + str(int(rating[0][1])), 1, color) # text rendering
+		screen.blit(top_score, (screen_size[0] // 2, 20)) # placing text on the screen
 
 def create_figure(form):
 	''' Function create the figure parameters
@@ -156,17 +159,79 @@ def move_the_figure(figure):
 
 	return figure
 
+def write_line(text, position_x, position_y, height, color):
+	pg_text = pygame.font.Font(None, height)
+	text_line = pg_text.render(text, 1, color) # text rendering
+	screen.blit(text_line, (position_x, position_y)) # placing text on the screen
+
 def game_over():
-	''' Function shows your score on the screen '''
+	''' Function shows your score on the screen and write the score in rating '''
 	screen.fill(BLACK)
-	pg_text = pygame.font.Font(None, 100)
-	text_score = pg_text.render(user_name + ', your score is ' + str(int(score)), 1, WHITE) # text rendering
-	screen.blit(text_score, (100, 200)) # placing text on the screen
+	write_line(user_name + ', your score is ' + str(int(score)), screen_size[0]//10, screen_size[1]//4, 80, WHITE) # write line number
+	'''pg_text = pygame.font.Font(None, 100)
+				text_score = pg_text.render(, 1, WHITE) # text rendering
+				screen.blit(text_score, (screen_size[0]//10, screen_size[1]//4)) # placing text on the screen'''
+
+	for i in range(np.minimum(10, len(rating))):
+		if (i+1 == position_in_rating) or (position_in_rating > 10 and i == 9):
+			color = RED
+		else:
+			color = WHITE
+
+		if i < 8 or position_in_rating <= 10:
+			write_line(str(i+1), screen_size[0]//6, screen_size[1]//2.5 + i*20, 30, color) # write line number
+			write_line(rating[i][0], screen_size[0]//5, screen_size[1]//2.5 + i*20, 30, color) # write line number
+			write_line(str(rating[i][1]), screen_size[0]//1.5, screen_size[1]//2.5 + i*20, 30, color) # write line number
+		elif i == 8:
+			write_line('...', screen_size[0]//6, screen_size[1]//2.5 + i*20, 30, color) # write tree dot line
+			write_line('...', screen_size[0]//5, screen_size[1]//2.5 + i*20, 30, color) # write tree dot line
+			write_line('...', screen_size[0]//1.5, screen_size[1]//2.5 + i*20, 30, color) # write tree dot line
+		else:
+			write_line(str(position_in_rating), screen_size[0]//6, screen_size[1]//2.5 + i*20, 30, color) # write line number
+			write_line(rating[position_in_rating-1][0], screen_size[0]//5, screen_size[1]//2.5 + i*20, 30, color) # write line number
+			write_line(str(rating[position_in_rating-1][1]), screen_size[0]//1.5, screen_size[1]//2.5 + i*20, 30, color) # write line number
+		
+
 	pygame.display.update()
+
+def write_score_to_rating():
+	''' Function writing sorted list of players in file
+	and returns positon of current player
+	---
 	return
+		position_in_rating: int
+	'''
+	# Reading current rating
+	global rating
+	
+	# Placing current score on it's position and calculating number in rating
+	if len(rating) == 0:
+		rating.append([user_name, int(score)])
+		position_in_rating = 1
+	elif score < rating[-1][1]:
+		rating.append([user_name, int(score)])
+		position_in_rating = len(rating)
+	else:
+		for i in range(len(rating)):
+			if score >= rating[i][1]:
+				rating.insert(i, [user_name, int(score)])
+				position_in_rating = i+1
+				break
 
+	# Preparing text string to re-write the rating
+	rating_string = ''
+	for line in rating:
+		rating_string += ' '.join(str(x) for x in line)
+		rating_string += '\n'
+	# Rating re-writing
+	with open('rating.txt', 'w') as file:
+		file.write(rating_string)
+	return position_in_rating
 
-user_name = input('Type your nickname: ')
+user_name = ''
+
+while len(user_name) == 0:
+	user_name = input('Type your nickname: ')
 
 pygame.init()
 
@@ -198,6 +263,17 @@ max_ball_radius = 50
 max_ball_speed = 0.2
 g = 0.0002 # gravity acceleration
 score = 0 # initial score
+rating = [] # initializing rating list
+
+# Reading rating of players
+with open('rating.txt') as file:
+	for line in file:
+		rating += [line.rstrip().split()]
+
+	for i in range(len(rating)):
+		rating[i][1] = int(rating[i][1])
+	# Rating sort
+	rating = sorted(rating, key=lambda line: -line[1])
 
 # Generating ball set
 for i in range(number_of_balls):
@@ -233,8 +309,11 @@ while not finished:
 		if figure['r'] > 0.25 * screen_size[1]:
 			finished = True
 
+position_in_rating = write_score_to_rating()
+game_over()
+
+# Waiting for quite
 while not quited:
-	game_over()
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			quited = True
