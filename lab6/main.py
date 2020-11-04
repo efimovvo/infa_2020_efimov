@@ -4,12 +4,6 @@ from pygame.draw import *
 from random import randint, random
 import numpy as np
 
-def rotate_object(image, rect, angle):
-    """rotate an image while keeping its center"""
-    rotate_image = pygame.transform.rotate(image, angle)
-    rotate_rect = rotate_image.get_rect(center=rect.center)
-    return rotate_image, rotate_rect
-
 
 class Tank(pygame.sprite.Sprite):
     def __init__(self):
