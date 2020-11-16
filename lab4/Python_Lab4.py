@@ -193,10 +193,7 @@ def game_over():
 
 	screen.fill(BLACK)
 	# Printing result
-	write_line('Game over. ' + user_name + ', your score is ' + str(int(score)), screen_size[0]//10, screen_size[1]//4, 60, WHITE) # write line number
-	'''pg_text = pygame.font.Font(None, 100)
-				text_score = pg_text.render(, 1, WHITE) # text rendering
-				screen.blit(text_score, (screen_size[0]//10, screen_size[1]//4)) # placing text on the screen'''
+	write_line('Game over. ' + user_name + ', your score is ' + str(int(score)),screen_size[0]//10, screen_size[1]//4, 60, WHITE) # write line number
 
 	# Printing rating
 	for i in range(np.minimum(10, len(rating))):

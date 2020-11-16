@@ -222,7 +222,6 @@ class Target(Game_Object):
             canv.itemconfig(self.id_points,
                 text = 'Green: '+str(self.points),
             )
-        #canv.itemconfig(self.id_points, text=self.points)
 
 
 targets = [Target(), Target(color='green')]

@@ -17,6 +17,7 @@ class Tank(pygame.sprite.Sprite):
         self.moving_speed = 10
         self.rotation_speed = 0.1
         self.angle_to_east = 0
+        self.life = 100
 
         self.tank_head = TankHead(self)
 
@@ -52,9 +53,21 @@ class Tank(pygame.sprite.Sprite):
             self.image = pygame.transform.rotozoom(self.orig_image, -self.angle_to_east * 180 / np.pi, 1)
             self.rect = self.image.get_rect(center=self.rect.center)
 
-    def shoot(self, power):
-        bullets.append(Bullet(self, power))
-        all_sprites.add(bullets[-1])
+        for bullet in bullets:
+            if pygame.sprite.collide_rect(self, bullet) and bullet.color == BLUE:
+                if bullet.type == 'rocket':
+                    self.life -= 5
+                else:
+                    self.life -= 1
+                bullet.kill()
+                bullets.remove(bullet)
+
+
+        if self.life <= 0:
+            self.kill()
+            self.tank_head.kill()
+
+            self.__init__()
 
 
 class TankHead(pygame.sprite.Sprite):
@@ -72,30 +85,116 @@ class TankHead(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.center = self.tank.rect.center
-        vector = (pygame.mouse.get_pos()[0] - self.tank.rect.centerx) + 1j * (pygame.mouse.get_pos()[1] - self.tank.rect.centery)
+        vector = (pygame.mouse.get_pos()[0] - self.tank.rect.centerx) + 1j * (
+                    pygame.mouse.get_pos()[1] - self.tank.rect.centery)
         self.angle_to_target = np.angle(vector, deg=True)
         self.image = pygame.transform.rotozoom(self.orig_image, -self.angle_to_target, 1)
         self.rect = self.image.get_rect(center=self.rect.center)
 
+    def shoot(self, type, power, color):
+        if type == 'bullet':
+            bullets.append(Bullet(self, power, 3, color))
+        else:
+            bullets.append(Rocket(self, power, 3, color))
+        all_sprites.add(bullets[-1])
+
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, tank, power):
+    def __init__(self, tank_head, power, size, color):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((3, 3))
-        self.image.fill(RED)
+        self.image = pygame.Surface((size, size))
+        self.image.fill(color)
         self.rect = self.image.get_rect()
-        self.rect.center = tank.rect.center
 
-        self.x_speed = power * np.cos(tank.tank_head.angle_to_target * np.pi / 180)
-        self.y_speed = power * np.sin(tank.tank_head.angle_to_target * np.pi / 180)
+        self.rect.center = (tank_head.rect.centerx + 10 * np.cos(tank_head.angle_to_target * np.pi / 180),
+                            tank_head.rect.centery + 10 * np.sin(tank_head.angle_to_target * np.pi / 180))
 
-        self.tank = tank
+        self.x_speed = power * np.cos(tank_head.angle_to_target * np.pi / 180)
+        self.y_speed = power * np.sin(tank_head.angle_to_target * np.pi / 180)
+
+        self.color = color
+        self.type = 'bullet'
+        self.tank_head = tank_head
 
     def update(self):
         self.rect.x += self.x_speed
         self.rect.y += self.y_speed
 
         if self.rect.x < 0:
+            bullets.remove(self)
+            self.kill()
+
+
+class Tower(TankHead):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.orig_image = pygame.image.load('tank_head.png').convert_alpha()
+        self.image = self.orig_image
+        self.rect = self.image.get_rect()
+        self.rect.center = (randint(50, screen_size[0] - 50), randint(50, screen_size[1] - 50))
+
+        self.angle_to_target = randint(-180, 180)
+        self.angle_max_speed = 0.5
+        self.life = 10
+
+        all_sprites.add(self)
+
+    def update(self):
+        vector = (tanks[0].rect.centerx - self.rect.centerx +
+                  1j * (tanks[0].rect.centery - self.rect.centery))
+        if (np.abs(self.angle_to_target - np.angle(vector, deg=True)) > 180
+                and self.angle_to_target > np.angle(vector, deg=True)
+                or np.abs(self.angle_to_target - np.angle(vector, deg=True)) < 180
+                and self.angle_to_target < np.angle(vector, deg=True)):
+            self.angle_to_target += self.angle_max_speed
+        else:
+            self.angle_to_target -= self.angle_max_speed
+        self.image = pygame.transform.rotozoom(self.orig_image, -self.angle_to_target, 1)
+        self.rect = self.image.get_rect(center=self.rect.center)
+
+        for bullet in bullets:
+            if pygame.sprite.collide_rect(self, bullet) and bullet.color == RED:
+                bullet.kill()
+                bullets.remove(bullet)
+                if bullet.type == 'rocket':
+                    self.life -= 5
+                else:
+                    self.life -= 1
+
+            if self.life <= 0:
+                self.__init__()
+
+        if randint(0, 100) > 90:
+            self.shoot('bullet', 20, BLUE)
+
+
+class Rocket(Bullet):
+    def __init__(self, tank_head, power, size, color):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.orig_image = pygame.image.load('rocket.png').convert_alpha()
+        self.image = self.orig_image
+        self.rect = self.image.get_rect()
+
+        self.image = pygame.transform.rotozoom(self.orig_image, -tank_head.angle_to_target, 1)
+        self.rect = self.image.get_rect(center=self.rect.center)
+
+        self.rect.center = (tank_head.rect.centerx + 20 * np.cos(tank_head.angle_to_target * np.pi / 180),
+                            tank_head.rect.centery + 20 * np.sin(tank_head.angle_to_target * np.pi / 180))
+
+        self.x_speed = power * np.cos(tank_head.angle_to_target * np.pi / 180)
+        self.y_speed = power * np.sin(tank_head.angle_to_target * np.pi / 180)
+
+        self.type = 'rocket'
+        self.color = color
+        self.tank_head = tank_head
+
+    def update(self):
+        self.rect.x += self.x_speed
+        self.rect.y += self.y_speed
+
+        if self.rect.x < 0:
+            bullets.remove(self)
             self.kill()
 
 
@@ -125,13 +224,17 @@ COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 # Creating variables for game process
 background_color = WHITE
+number_of_towers = 2
 
 # Generating game objects
 bullets = []
 tanks = []
+towers = []
 
 all_sprites = pygame.sprite.Group()
 tanks += [Tank()]
+for i in range(number_of_towers):
+    towers += [Tower()]
 
 # Draw_the_score(score)
 
@@ -144,7 +247,9 @@ while not finished:
         if event.type == QUIT:
             finished = True
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            tanks[0].shoot(30)
+            tanks[0].tank_head.shoot('bullet', 30, RED)
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
+            tanks[0].tank_head.shoot('rocket', 10, RED)
     pressed_keys = pygame.key.get_pressed()
 
     all_sprites.update()

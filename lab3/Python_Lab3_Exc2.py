@@ -205,7 +205,6 @@ def draw_icecream(
 		icecream_vector -
 		orto_vector(icecream_vector) // 2).tolist()
 
-	print(point_set)
 	polygon(
 		screen,
 		colors['cone'],

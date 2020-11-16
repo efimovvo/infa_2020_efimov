@@ -205,7 +205,6 @@ def draw_icecream(
 		icecream_vector -
 		orto_vector(icecream_vector) // 2).tolist()
 
-	print(point_set)
 	polygon(
 		screen,
 		colors['cone'],
@@ -260,7 +259,11 @@ def draw_icecream(
 			).tolist()
 			]
 
-
+def draw_cloud(pos_x, pos_y, size):
+	ellipse(screen, WHITE, pygame.Rect(pos_x, pos_y, size, size//1.5), 0)
+	ellipse(screen, WHITE, pygame.Rect(pos_x + size, pos_y, size, size//1.5), 0)
+	ellipse(screen, WHITE, pygame.Rect(pos_x + size // 2, pos_y + size // 3, size, size//1.5), 0)
+	ellipse(screen, WHITE, pygame.Rect(pos_x + size // 2, pos_y - size // 3, size, size//1.5), 0)
 
 
 pygame.init()
@@ -282,6 +285,7 @@ ORANGE = (255, 204, 0)
 BROWN = (85, 0, 0)
 RED = (255, 0, 0)
 WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
 
 # It is basic/center point for all picture
 center = np.array([LENGTH // 2, HEIGHT // 2])
@@ -304,6 +308,7 @@ draw_girl(-HEIGHT // 12, HEIGHT // 6, arms={'left' : 'straight', 'right' : 'bend
 draw_girl(HEIGHT // 12, HEIGHT // 6, arms={'left' : 'bend', 'right' : 'straight'})
 draw_boy(-HEIGHT // 4, HEIGHT // 6, arms={'left' : 'straight', 'right' : 'straight'})
 draw_boy(HEIGHT // 4, HEIGHT // 6, arms={'left' : 'straight', 'right' : 'straight'})
+draw_boy(HEIGHT // (12 / 5), HEIGHT // 6, arms={'left' : 'straight', 'right' : 'straight'})
 draw_icecream(
 	colors={'cone' : ORANGE,
 			'ball_1' : BROWN,
@@ -319,7 +324,8 @@ draw_icecream(
 	colors={'cone' : ORANGE,
 			'ball_1' : BROWN,
 			'ball_2' : WHITE,
-			'ball_3' : RED},
+			'ball_3' : RED,
+			'ball_4' : YELLOW},
 	base_point=(center + np.array([HEIGHT // 3, HEIGHT // 25])),
 	fiber_length=0,
 	icecream_size=HEIGHT // 20,
@@ -337,6 +343,8 @@ draw_icecream(
 	icecream_vector=np.array([-0.1, -1])
 	)
 
+draw_cloud(100, 50, 50)
+draw_cloud(500, 100, 50)
 
 pygame.display.update()
 clock = pygame.time.Clock()

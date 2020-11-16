@@ -2,6 +2,7 @@ Hello 42
 Slava 32
 Yt 31
 U 16
+Slava 14
 lk 14
 ss 0
 g 0
@@ -19,6 +20,9 @@ fsdg 0
 yyy -19
 U -24
 Looser_sqared -25
+NEW_NAME -66
+My_name -102
 Looser -125
 asdf -159
 Slava2 -160
+Ten -711
